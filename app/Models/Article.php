@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
+    use HasFactory;
+    
     protected $fillable = [
         'external_id','source_id','author_id','category_id',
         'title','description','content','url','url_to_image','published_at','raw'

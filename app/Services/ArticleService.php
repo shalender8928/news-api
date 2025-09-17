@@ -29,6 +29,12 @@ class ArticleService
 
         return [
             'data' => $data,
+            'links' => [
+                'first' => $page->url(1),
+                'last' => $page->url($page->lastPage()),
+                'prev' => $page->previousPageUrl(),
+                'next' => $page->nextPageUrl(),
+            ],
             'meta' => [
                 'current_page' => $page->currentPage(),
                 'last_page' => $page->lastPage(),
