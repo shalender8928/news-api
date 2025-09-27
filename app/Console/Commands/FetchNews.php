@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\SourceKey;
 use Illuminate\Console\Command;
 use App\Services\NewsIngestService;
-use App\Services\NewsProviders\NewsApiService;
-use App\Services\NewsProviders\GuardianService;
-use App\Services\NewsProviders\NytService;
+use App\Services\NewsProviders\{GuardianService, NewsApiService, NytService};
+
 
 class FetchNews extends Command
 {
@@ -27,23 +27,28 @@ class FetchNews extends Command
     /**
      * Execute the console command.
      */
-    public function handle(NewsIngestService $ingest, NewsApiService $newsApi, GuardianService $guardian, NytService $nyt)
+    public function handle(
+        NewsIngestService $ingest, 
+        NewsApiService $newsApi, 
+        GuardianService $guardian, 
+        NytService $nyt
+    )
     {
         $this->info('Fetching NewsAPI...');
         $items = $newsApi->fetch();
-        $count = $ingest->ingest('newsapi', $items);
+        $count = $ingest->ingest(SourceKey::NEWSAPI, $items);
         $this->info("NewsAPI: imported {$count} items.");
 
         $this->info('Fetching Guardian...');
         $items = $guardian->fetch();
-        $count = $ingest->ingest('guardian', $items);
+        $count = $ingest->ingest(SourceKey::GUARDIAN, $items);
         $this->info("Guardian: imported {$count} items.");
 
         $this->info('Fetching NYT...');
         $items = $nyt->fetch();
-        $count = $ingest->ingest('nyt', $items);
+        $count = $ingest->ingest(SourceKey::NYT, $items);
         $this->info("NYT: imported {$count} items.");
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

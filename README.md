@@ -14,7 +14,6 @@ A Laravel-based API service for fetching, storing, and serving articles from ext
 4. Copy `.env.example` -> `.env` and set DB and API keys `NEWSAPI_KEY`, `GUARDIAN_KEY`, `NYT_KEY`
 5. `php artisan key:generate`
 6. `php artisan migrate`
-7. `php artisan db:seed --class=SourceSeeder`
 8. Manual fetch: `php artisan news:fetch`
 9. Or schedule: set cron `* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1`
 

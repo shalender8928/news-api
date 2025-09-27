@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('articles', function (Blueprint $table) {
             $table->id();
             $table->string('external_id')->nullable()->index();
-            $table->foreignId('source_id')->constrained('sources')->cascadeOnDelete();
+            $table->string('source_key');
             $table->foreignId('author_id')->nullable()->constrained('authors')->nullOnDelete();
             $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
 
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->json('raw')->nullable();
             $table->timestamps();
 
-            $table->unique(['external_id','source_id']);
+            $table->unique(['external_id']);
         });
     }
 

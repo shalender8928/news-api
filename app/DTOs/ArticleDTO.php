@@ -3,6 +3,7 @@
 namespace App\DTOs;
 
 use App\Models\Article;
+use App\Enums\SourceKey;
 
 class ArticleDTO
 {
@@ -29,8 +30,14 @@ class ArticleDTO
         $this->image = $a->url_to_image;
         $this->author = $a->author ? $a->author->name : null;
         $this->category = $a->category ? $a->category->name : null;
-        $this->source = $a->source ? $a->source->key : '';
-        $this->publishedAt = $a->published_at ? $a->published_at->toIso8601String() : now()->toIso8601String();
+        
+        $this->source = $a->source_key instanceof SourceKey
+            ? $a->source_key->title()
+            : ($a->source_key ?? '');
+
+        $this->publishedAt = $a->published_at
+            ? $a->published_at->toIso8601String()
+            : now()->toIso8601String();
     }
 
     public function toArray(): array

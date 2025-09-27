@@ -5,13 +5,21 @@ namespace App\Repositories;
 use App\Models\Article;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use App\Enums\SourceKey;
 
 class ArticleRepository
 {
+
+    protected $articleModel;
+
+    public function __construct(Article $articleModel)
+    {
+        $this->articleModel =  $articleModel;
+    }
+
     public function query(): Builder
     {
-        return Article::with(['source','author','category']);
+        return $this->articleModel->with(['author','category']);
     }
 
     /**
@@ -21,59 +29,49 @@ class ArticleRepository
      */
     public function search(array $filters = []): LengthAwarePaginator
     {
-        $q = $this->query();
+        $query = $this->query();
 
-        if (!empty($filters['source'])) {
-            $q->whereHas('source', fn($b) => $b->where('key', $filters['source']));
-        }
-
-        if (!empty($filters['category'])) {
-            $q->whereHas('category', fn($b) => $b->where('name', $filters['category']));
-        }
-
-        if (!empty($filters['author'])) {
-            $q->whereHas('author', fn($b) => $b->where('name', 'like', '%'.$filters['author'].'%'));
-        }
-
-        if (!empty($filters['from'])) {
-            $q->where('published_at', '>=', $filters['from']);
-        }
-
-        if (!empty($filters['to'])) {
-            $q->where('published_at', '<=', $filters['to']);
-        }
-
-        if (!empty($filters['q'])) {
-            $q->where(function($s) use ($filters) {
-                $s->where('title', 'like', '%'.$filters['q'].'%')
-                  ->orWhere('description', 'like', '%'.$filters['q'].'%')
-                  ->orWhere('content', 'like', '%'.$filters['q'].'%');
+        $query->when($filters['source'] ?? null, function ($q, $source) {
+            // Ensure it's a valid enum before filtering
+            if ($enum = SourceKey::tryFrom($source)) {
+                $q->where('source_key', $enum->value);
+            }
+        })
+        ->when($filters['category'] ?? null, function ($q, $category) {
+            $q->whereRelation('category', 'name', $category);
+        })
+        ->when($filters['author'] ?? null, function ($q, $author) {
+            $q->whereHas('author', fn($b) => $b->where('name', 'like', '%' . $author . '%'));
+        })
+        ->when($filters['from'] ?? null, function ($q, $from) {
+            $q->where('published_at', '>=', $from);
+        })
+        ->when($filters['to'] ?? null, function ($q, $to) {
+            $q->where('published_at', '<=', $to);
+        })
+        ->when($filters['q'] ?? null, function ($q, $searchTerm) {
+            $q->where(function($s) use ($searchTerm) {
+                $s->where('title', 'like', '%' . $searchTerm . '%')
+                ->orWhere('description', 'like', '%' . $searchTerm . '%')
+                ->orWhere('content', 'like', '%' . $searchTerm . '%');
             });
-        }
+        });
 
         $perPage = $filters['per_page'] ?? 20;
-        return $q->orderBy('published_at','desc')->paginate($perPage);
+        return $query->orderBy('published_at','desc')->paginate($perPage);
     }
 
     public function storeOrUpdate(array $data): Article
     {
-        // uniqueness: external_id+source_id or url
-        $query = Article::query();
+        // Determine the attributes to find the unique article by
+        $uniqueAttributes = !empty($data['external_id'])
+            ? ['external_id' => $data['external_id'], 'source_key' => $data['source_key']]
+            : ['url' => $data['url']];
 
-        if (!empty($data['external_id'])) {
-            $query->where('external_id', $data['external_id'])
-                  ->where('source_id', $data['source_id']);
-        } else {
-            $query->where('url', $data['url']);
-        }
+        return $this->articleModel->updateOrCreate($uniqueAttributes, $data);
+    }
 
-        $existing = $query->first();
-
-        if ($existing) {
-            $existing->update($data);
-            return $existing;
-        }
-
-        return Article::create($data);
+    public function find($id) {
+        return $this->query()->findOrFail($id);
     }
 }

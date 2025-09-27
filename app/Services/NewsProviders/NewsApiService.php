@@ -4,6 +4,8 @@ namespace App\Services\NewsProviders;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NewsApiService implements ProviderInterface
 {
@@ -29,8 +31,8 @@ class NewsApiService implements ProviderInterface
         try {
             $res = $this->client->get('top-headlines', ['query' => $query]);
             $data = json_decode($res->getBody()->getContents(), true);
-        } catch (\Throwable $e) {
-            \Log::error('NewsApiService error: '.$e->getMessage());
+        } catch (Throwable $e) {
+            Log::error('NewsApiService error: '.$e->getMessage());
             return [];
         }
 

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\DTOs\ArticleDTO;
+use App\Enums\SourceKey;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\ArticleService;
-use App\Models\Source;
 use App\Models\Category;
 
 class ArticleController extends Controller
@@ -30,16 +31,16 @@ class ArticleController extends Controller
 
     public function show($id)
     {
-        $filters = ['per_page' => 1];
-        $res = $this->service->list(['q' => null]);
-        // for simplicity show via repository or model
-        $article = \App\Models\Article::with(['source','author','category'])->findOrFail($id);
-        return response()->json((new \App\DTOs\ArticleDTO($article))->toArray());
+        $article = $this->service->getById($id);
+        return response()->json((new ArticleDTO($article))->toArray());
     }
 
     public function meta()
     {
-        $sources = Source::all(['key','title']);
+        $sources = collect(SourceKey::cases())->map(fn($case) => [
+            'key' => $case->value,
+            'title' => $case->title(), // from enum method
+        ]);
         $categories = Category::all(['name']);
         return response()->json(['sources' => $sources, 'categories' => $categories]);
     }

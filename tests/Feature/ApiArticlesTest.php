@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\SourceKey;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Article;
-use App\Models\Source;
 
 class ApiArticlesTest extends TestCase
 {
@@ -38,13 +37,8 @@ class ApiArticlesTest extends TestCase
 
     public function test_articles_endpoint_returns_paginated_data()
     {
-        $source = Source::firstOrCreate(
-            ['key' => 'newsapi'],
-            ['title' => 'NewsAPI', 'api_name' => 'NewsAPI', 'meta' => json_encode([])]
-        );
-
         Article::factory()->count(5)->create([
-            'source_id' => $source->id,
+            'source_key' => SourceKey::NEWSAPI,
         ]);
 
         $resp = $this->getJson('/api/v1/articles');

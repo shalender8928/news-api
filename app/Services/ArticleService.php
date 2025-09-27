@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Repositories\ArticleRepository;
 use App\DTOs\ArticleDTO;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Article;
 
 class ArticleService
 {
@@ -47,5 +47,9 @@ class ArticleService
     public function save(array $payload)
     {
         return $this->repo->storeOrUpdate($payload);
+    }
+
+    public function getById($id) {
+        return $this->repo->find($id);
     }
 }

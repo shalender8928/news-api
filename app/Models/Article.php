@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SourceKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,18 +11,24 @@ class Article extends Model
     use HasFactory;
     
     protected $fillable = [
-        'external_id','source_id','author_id','category_id',
-        'title','description','content','url','url_to_image','published_at','raw'
+        'external_id',
+        'source_key',
+        'author_id',
+        'category_id',
+        'title',
+        'description',
+        'content',
+        'url',
+        'url_to_image',
+        'published_at',
+        'raw'
     ];
 
     protected $casts = [
         'raw' => 'array',
         'published_at' => 'datetime',
+        'source_key' => SourceKey::class,
     ];
-
-    public function source() { 
-        return $this->belongsTo(Source::class); 
-    }
     
     public function author() { 
         return $this->belongsTo(Author::class); 

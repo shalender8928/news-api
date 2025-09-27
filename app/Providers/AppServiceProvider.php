@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Services\NewsProviders\{GuardianService, NewsApiService, NytService, ProviderInterface};
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,14 +12,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(\App\Services\NewsProviders\ProviderInterface::class, function($app){
+        $this->app->bind(ProviderInterface::class, function($app){
             // not used directly; specific services will be resolved separately
         });
 
         // If you prefer you can singleton bind the service classes:
-        $this->app->singleton(\App\Services\NewsProviders\NewsApiService::class);
-        $this->app->singleton(\App\Services\NewsProviders\GuardianService::class);
-        $this->app->singleton(\App\Services\NewsProviders\NytService::class);
+        $this->app->singleton(NewsApiService::class);
+        $this->app->singleton(GuardianService::class);
+        $this->app->singleton(NytService::class);
     }
 
     /**

@@ -4,6 +4,8 @@ namespace App\Services\NewsProviders;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class GuardianService implements ProviderInterface
 {
@@ -29,8 +31,8 @@ class GuardianService implements ProviderInterface
         try {
             $res = $this->client->get('search', ['query' => $query]);
             $data = json_decode($res->getBody()->getContents(), true);
-        } catch (\Throwable $e) {
-            \Log::error('GuardianService error: '.$e->getMessage());
+        } catch (Throwable $e) {
+            Log::error('GuardianService error: '.$e->getMessage());
             return [];
         }
 

@@ -4,6 +4,8 @@ namespace App\Services\NewsProviders;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NytService implements ProviderInterface
 {
@@ -25,8 +27,8 @@ class NytService implements ProviderInterface
                 'query' => ['api-key' => $this->key]
             ]);
             $data = json_decode($res->getBody()->getContents(), true);
-        } catch (\Throwable $e) {
-            \Log::error('NytService error: '.$e->getMessage());
+        } catch (Throwable $e) {
+            Log::error('NytService error: '.$e->getMessage());
             return [];
         }
 
